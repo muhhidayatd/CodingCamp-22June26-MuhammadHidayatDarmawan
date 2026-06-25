@@ -1,0 +1,644 @@
+/* =============================================================================
+   css/style.css — Expense & Budget Visualizer
+   Tasks: 12.1 Base layout & typography
+          12.2 Form & inline error messages
+          12.3 Transaction List
+          12.4 Chart section & Warning Toast
+   ============================================================================= */
+
+/* =============================================================================
+   12.1 — CSS Reset & Base
+   ============================================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #1f2937;
+  background-color: #f3f4f6;
+  min-height: 100vh;
+  overflow-x: hidden; /* prevent horizontal scroll at any viewport width */
+}
+
+/* Centered max-width container */
+.container {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* App title */
+h1 {
+  font-size: 1.625rem;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+/* Section headings */
+h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.75rem;
+}
+
+/* =============================================================================
+   Balance section heading + value
+   ============================================================================= */
+
+.balance-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+}
+
+.balance-section h2 {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.375rem;
+}
+
+#balance-display {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+/* =============================================================================
+   Card wrapper used by form, list and chart sections
+   ============================================================================= */
+
+.form-section,
+.list-section,
+.chart-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+}
+
+/* =============================================================================
+   12.2 — Form & inline error messages
+   ============================================================================= */
+
+#transaction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Each label + input + error row */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.field-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Shared sizing for text/number inputs and select */
+#transaction-form input[type='text'],
+#transaction-form input[type='number'],
+#transaction-form select {
+  width: 100%;
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  color: #1f2937;
+  background-color: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 0.5rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Custom select arrow */
+#transaction-form select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+/* Focus ring — meets accessibility contrast */
+#transaction-form input[type='text']:focus,
+#transaction-form input[type='number']:focus,
+#transaction-form select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+}
+
+/* Error state border */
+#transaction-form input.is-error,
+#transaction-form select.is-error {
+  border-color: #ef4444;
+}
+
+/* Submit button */
+#transaction-form button[type='submit'] {
+  align-self: flex-start;
+  height: 2.5rem;
+  padding: 0 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: #ffffff;
+  background-color: #6366f1;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#transaction-form button[type='submit']:hover {
+  background-color: #4f46e5;
+}
+
+#transaction-form button[type='submit']:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4);
+}
+
+#transaction-form button[type='submit']:active {
+  background-color: #4338ca;
+}
+
+/* Inline error messages — shown below the offending field */
+.error-msg {
+  font-size: 0.8125rem;
+  color: #ef4444;
+  min-height: 1.1em; /* reserve space so layout doesn't shift */
+  line-height: 1.3;
+}
+
+/* =============================================================================
+   12.3 — Transaction List
+   ============================================================================= */
+
+#transaction-list {
+  list-style: none;
+  overflow-y: auto;
+  max-height: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  /* Custom scrollbar — subtle */
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+#transaction-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+#transaction-list::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 9999px;
+}
+
+/* Each transaction row */
+#transaction-list li {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #f3f4f6;
+  border-radius: 0.5rem;
+  min-width: 0; /* allow children to shrink */
+}
+
+/* Item name — grows to fill available space, truncates if too long */
+.tx-name {
+  flex: 1 1 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* Formatted amount */
+.tx-amount {
+  flex-shrink: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1f2937;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Category badge — pill shape, neutral default */
+.tx-category {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  white-space: nowrap;
+  /* Neutral default — overridden per-category below */
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+/* Per-category badge colors — JS sets textContent to category name;
+   use attribute selector on data-category once task 12.5 adds data attrs.
+   For now, provide color via class hooks the JS can set via classList. */
+.tx-category--food,
+.tx-category[data-category='Food'] {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.tx-category--transport,
+.tx-category[data-category='Transport'] {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.tx-category--fun,
+.tx-category[data-category='Fun'] {
+  background-color: #ffedd5;
+  color: #9a3412;
+}
+
+/* Theme Button*/
+.theme-btn{
+    border:none;
+    padding:12px;
+    border-radius:12px;
+    cursor:pointer;
+}
+
+/* Delete button — destructive but subtle */
+.btn-delete {
+  flex-shrink: 0;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: #ef4444;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+  line-height: 1;
+}
+
+.btn-delete:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.btn-delete:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #ef4444;
+}
+
+/* Empty state */
+.empty-msg {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.9375rem;
+  font-style: italic;
+  padding: 1.5rem 0;
+}
+
+/* =============================================================================
+   12.4 — Chart section & Warning Toast
+   ============================================================================= */
+
+.chart-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Canvas: constrained so the pie doesn't blow up on wide viewports */
+#spending-chart {
+  max-width: 300px;
+  max-height: 300px;
+  width: 100%;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Hidden utility class used by JS to toggle canvas / placeholder */
+.hidden {
+  display: none !important;
+}
+
+/* Placeholder text when there are no transactions */
+#chart-placeholder {
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 0.9375rem;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+/* Warning Toast — fixed bottom-right */
+.toast {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  max-width: min(360px, calc(100vw - 2.5rem));
+  padding: 0.875rem 1rem;
+  background-color: #f59e0b;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-family: inherit;
+  border-radius: 0.625rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  line-height: 1.45;
+}
+
+.toast.hidden {
+  display: none;
+}
+
+.toast-message {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Close button inside the toast */
+.toast-close {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.85;
+  transition: opacity 0.12s ease;
+  font-family: inherit;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+.toast-close:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* =============================================================================
+   12.5 — Responsive Breakpoints
+   Mobile-first base is already set above (single column, max-width: 640px).
+   ============================================================================= */
+
+/* ---------------------------------------------------------------------------
+   Tablet / small desktop: min-width 640px
+   - Widen container to 960px
+   - Form and list sit side-by-side (2-column grid: ~45% / ~55%)
+   - Balance and chart sections remain full-width (span both columns)
+   --------------------------------------------------------------------------- */
+@media (min-width: 640px) {
+  .container {
+    max-width: 960px;
+    padding: 2rem 1.5rem;
+    /* Switch from single flex column to a 2-column grid */
+    display: grid;
+    grid-template-columns: 45fr 55fr;
+    grid-template-rows: auto;
+    column-gap: 1.5rem;
+    row-gap: 1.75rem;
+  }
+
+  /* App title — full width across both columns */
+  .container > h1 {
+    grid-column: 1 / -1;
+  }
+
+  /* Balance display — full width */
+  .balance-section {
+    grid-column: 1 / -1;
+  }
+
+  /* Form takes the left column */
+  .form-section {
+    grid-column: 1 / 2;
+    align-self: start;
+  }
+
+  /* Transaction list takes the right column */
+  .list-section {
+    grid-column: 2 / 3;
+    align-self: start;
+  }
+
+  /* Chart — full width below the two-column pair */
+  .chart-section {
+    grid-column: 1 / -1;
+  }
+
+  /* Submit button: full width on tablet feels natural in the narrower left col */
+  #transaction-form button[type='submit'] {
+    align-self: stretch;
+    width: 100%;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Desktop: min-width 1024px
+   - Widen container to 1200px with a bit more breathing room
+   - Increase padding for larger screens
+   --------------------------------------------------------------------------- */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1200px;
+    padding: 2.5rem 2rem;
+    column-gap: 2rem;
+  }
+
+  /* Give the transaction list a taller scroll window on large screens */
+  #transaction-list {
+    max-height: 420px;
+  }
+
+  /* Larger chart on desktop */
+  #spending-chart {
+    max-width: 380px;
+    max-height: 380px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Wide / ultra-wide screens: min-width 1440px
+   - Hard cap at 1400px so content stays readable and centered at 2560px
+   --------------------------------------------------------------------------- */
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1400px;
+  }
+}
+/* ===================================
+   FULL DARK MODE
+=================================== */
+
+body.dark {
+    background: #171616 !important;
+    color: #ffffff !important;
+}
+
+/* Semua card */
+body.dark .container,
+body.dark .card,
+body.dark .balance-card,
+body.dark .form-section,
+body.dark .transactions-section,
+body.dark .chart-section,
+body.dark section {
+    background: #0a0a0a !important;
+    color: #ffffff !important;
+    border: 1px solid #1a1a1a !important;
+}
+
+/* Semua text */
+body.dark h1,
+body.dark h2,
+body.dark h3,
+body.dark h4,
+body.dark p,
+body.dark span,
+body.dark label,
+body.dark strong {
+    color: #ffffff !important;
+}
+
+/* Balance */
+body.dark #balance-display {
+    color: #ffffff !important;
+}
+
+/* Input */
+body.dark input,
+body.dark select,
+body.dark textarea {
+    background: #393737 !important;
+    color: #ffffff !important;
+    border: 1px solid #222222 !important;
+}
+
+body.dark input::placeholder,
+body.dark textarea::placeholder {
+    color: #888888 !important;
+}
+
+/* Focus */
+body.dark input:focus,
+body.dark select:focus,
+body.dark textarea:focus {
+    background: #525252 !important;
+    border-color: #444444 !important;
+    box-shadow: none !important;
+}
+
+/* Transaction List */
+body.dark #transaction-list li {
+    background: #292828 !important;
+    border: 1px solid #1f1f1f !important;
+    color: #ffffff !important;
+}
+
+/* Category Badge */
+body.dark .tx-category {
+    background: #181818 !important;
+    color: #ffffff !important;
+    border: 1px solid #2a2a2a !important;
+}
+
+/* Delete */
+body.dark .btn-delete {
+    background: #111111 !important;
+    color: #aca9a9 !important;
+    border: 1px solid #2a2a2a !important;
+}
+
+/* Submit */
+body.dark button[type="submit"] {
+    background: #1f1f1f !important;
+    color: #ffffff !important;
+    border: 1px solid #2a2a2a !important;
+}
+
+body.dark button[type="submit"]:hover {
+    background: #2a2a2a !important;
+}
+
+/* Theme Button */
+body.dark .theme-btn {
+    background: #111111 !important;
+    color: #ffffff !important;
+    border: 1px solid #222222 !important;
+}
+
+body.dark .theme-btn:hover {
+    background: #1a1a1a !important;
+}
+
+/* Empty State */
+body.dark .empty-msg,
+body.dark #chart-placeholder {
+    color: #aaaaaa !important;
+}
+
+/* Scrollbar */
+body.dark ::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark ::-webkit-scrollbar-track {
+    background: #050505;
+}
+
+body.dark ::-webkit-scrollbar-thumb {
+    background: #222222;
+}
+
+body.dark ::-webkit-scrollbar-thumb:hover {
+    background: #333333;
+}
